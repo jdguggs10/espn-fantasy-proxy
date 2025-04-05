@@ -25,7 +25,10 @@ app.get('/standings', async (req, res) => {
       headers: {
         'Cookie': COOKIES,
         'X-Fantasy-Filter': JSON.stringify(filter),
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'Referer': 'https://fantasy.espn.com/',
+        'Origin': 'https://fantasy.espn.com'
       }
     });
 
