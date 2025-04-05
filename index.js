@@ -5,7 +5,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 const LEAGUE_ID = '30201';
 const SEASON_ID = '2025';
 const BASE_URL = `https://fantasy.espn.com/apis/v3/games/flb/seasons/${SEASON_ID}/segments/0/leagues/${LEAGUE_ID}`;
@@ -13,31 +13,23 @@ const COOKIES = process.env.ESPN_COOKIE;
 
 app.get('/standings', async (req, res) => {
   try {
-    const filter = {
-      teams: {
-        filterIds: {
-          value: Array.from({ length: 12 }, (_, i) => i + 1)
-        }
+    const response = await axios.get(`${BASE_URL}?view=mStandings`, {
+      headers: {
+        'Cookie': COOKIES,
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'Referer': 'https://fantasy.espn.com/',
+        'Origin': 'https://fantasy.espn.com'
       }
-    };
-
-const response = await axios.get(`${BASE_URL}?view=mStandings`, {
-  headers: {
-    'Cookie': COOKIES,
-    'Content-Type': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    'Referer': 'https://fantasy.espn.com/',
-    'Origin': 'https://fantasy.espn.com'
-  }
-});
+    });
 
     const teams = response.data?.teams;
 
     if (!teams || !Array.isArray(teams)) {
-      console.error('[Proxy] ESPN response:', response.data);
+      console.error('[Proxy] No teams returned. Raw response:', response.data);
       return res.status(500).json({
-        error: 'No teams returned from ESPN. Possible invalid cookies or league ID.',
-        rawResponse: response.data // show response to help debug
+        error: 'No teams returned from ESPN. Possible invalid cookie, wrong league, or ESPN blocked the call.',
+        rawResponse: response.data
       });
     }
 
@@ -50,27 +42,14 @@ const response = await axios.get(`${BASE_URL}?view=mStandings`, {
 
     res.json({ standings });
   } catch (err) {
-    console.error('[Proxy] Error:', err.message);
+    console.error('[Proxy] Error fetching standings:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ✅ OPTIONAL: TEAM ROSTER ENDPOINT (still safe to include)
-app.get('/roster/:teamId', async (req, res) => {
-  try {
-    const teamId = parseInt(req.params.teamId);
-    const response = await axios.get(`${BASE_URL}?view=mTeam`, {
-      headers: {
-        Cookie: COOKIES
-      }
-    });
-
-    const team = response.data.teams.find(t => t.id === teamId);
-    res.json({ roster: team?.roster?.entries || [] });
-  } catch (err) {
-    console.error('[Proxy] Roster error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
+// Optional test route
+app.get('/', (req, res) => {
+  res.send('✅ ESPN Proxy is live!');
 });
 
 app.listen(PORT, () => {
