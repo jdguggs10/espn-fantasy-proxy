@@ -24,6 +24,7 @@ app.get('/standings', async (req, res) => {
 const response = await axios.get(`${BASE_URL}?view=mStandings`, {
   headers: {
     'Cookie': COOKIES,
+    'Content-Type': 'application/json',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
     'Referer': 'https://fantasy.espn.com/',
     'Origin': 'https://fantasy.espn.com'
