@@ -5,7 +5,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 const LEAGUE_ID = '30201';
 const SEASON_ID = '2025';
 const BASE_URL = `https://fantasy.espn.com/apis/v3/games/flb/seasons/${SEASON_ID}/segments/0/leagues/${LEAGUE_ID}`;
@@ -47,11 +47,11 @@ app.get('/standings', async (req, res) => {
   }
 });
 
-// Optional test route
+// Just to confirm app is live
 app.get('/', (req, res) => {
-  res.send('✅ ESPN Proxy is live!');
+  res.send('✅ ESPN Fantasy Proxy is running!');
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ ESPN Proxy running on port ${PORT}`);
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`✅ ESPN Proxy running on port ${process.env.PORT}`);
 });
